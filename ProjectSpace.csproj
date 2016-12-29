@@ -81,7 +81,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\resources\Rooms\Scripts\NextTileController.cs" />
     <Compile Include="Assets\resources\Scripts\GameController.cs" />
     <Compile Include="Assets\resources\Scripts\Player.cs" />
     <Compile Include="Assets\resources\Scripts\Point.cs" />

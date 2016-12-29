@@ -2,65 +2,94 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Player : MonoBehaviour {
+namespace ProjectSpace
+{
+    public class Player : MonoBehaviour
+    {
 
-    private GameController gameController;
-    private bool keyPressed = false;
+        private GameController gameController;
+        public bool keyPressed = false;
 
-	// Use this for initialization
-	void Start () {
-        gameController = FindObjectOfType<GameController>();
-	}
-	
-	// Update is called once per frame
-	void Update () {
-        Point p = new Point(transform.position.x, transform.position.y);
-        Room originRoom = gameController.getRoomAt(p);
+        // Use this for initialization
+        void Start()
+        {
+            gameController = FindObjectOfType<GameController>();
+        }
 
-		if( Input.GetKeyDown(KeyCode.LeftArrow) )
+        // Update is called once per frame
+        void Update()
         {
-            if (originRoom.HasWestExit == false)
+            Point p = new Point(transform.position.x, transform.position.y);
+            MoveDirection moveDirection = MoveDirection.NORTH;
+            Room originRoom = gameController.getRoomAt(p);
+
+            if (Input.GetKeyDown(KeyCode.LeftArrow))
             {
-                return;
+                if (originRoom.HasWestExit == false)
+                {
+                    return;
+                }
+                p.X -= 1f;
+                keyPressed = true;
+                moveDirection = MoveDirection.WEST;
             }
-            p.X -= 1f;
-            keyPressed = true;
+            if (Input.GetKeyDown(KeyCode.RightArrow))
+            {
+                if (originRoom.HasEastExit == false)
+                {
+                    return;
+                }
+                p.X += 1f;
+                keyPressed = true;
+                moveDirection = MoveDirection.EAST;
+            }
+            if (Input.GetKeyDown(KeyCode.UpArrow))
+            {
+                if (originRoom.HasNorthExit == false)
+                {
+                    return;
+                }
+                p.Y += 1f;
+                keyPressed = true;
+                moveDirection = MoveDirection.NORTH;
+            }
+            if (Input.GetKeyDown(KeyCode.DownArrow))
+            {
+                if (originRoom.HasSouthExit == false)
+                {
+                    return;
+                }
+                p.Y -= 1f;
+                keyPressed = true;
+                moveDirection = MoveDirection.SOUTH;
+            }
+            if (keyPressed)
+            {
+                Room r = gameController.getRoomAt(p);
+                if (r == null)
+                {
+                    gameController.spawnPreviewRoomAt(p, moveDirection);
+                }
+                else
+                {
+                    handleMoveToExistingRoom(r, p, moveDirection);
+                }
+            }
         }
-        if (Input.GetKeyDown(KeyCode.RightArrow))
+
+        private void handleMoveToExistingRoom(Room targetRoom, Point p, MoveDirection direction)
         {
-            if (originRoom.HasEastExit == false)
+            if ((direction == MoveDirection.NORTH && targetRoom.HasSouthExit)
+                || (direction == MoveDirection.WEST && targetRoom.HasEastExit)
+                || (direction == MoveDirection.SOUTH && targetRoom.HasNorthExit)
+                || (direction == MoveDirection.EAST && targetRoom.HasWestExit))
             {
-                return;
+                this.transform.position = new Vector3(p.X, p.Y, 0);
             }
-            p.X += 1f;
-            keyPressed = true;
-        }
-        if (Input.GetKeyDown(KeyCode.UpArrow))
-        {
-            if (originRoom.HasNorthExit == false)
+            else
             {
-                return;
+                Debug.LogWarningFormat("Can't move to room at position [{0}, {1}], moving in direction {2}", p.X, p.Y, direction);
             }
-            p.Y += 1f;
-            keyPressed = true;
-        }
-        if (Input.GetKeyDown(KeyCode.DownArrow))
-        {
-            if (originRoom.HasSouthExit == false)
-            {
-                return;
-            }
-            p.Y -= 1f;
-            keyPressed = true;
-        }
-        if (keyPressed)
-        {
-            Room r = gameController.getRoomAt(p);
-            if (r == null)
-            {
-                gameController.spawnRoomAt(p);
-            }
-            this.transform.position = new Vector3(p.X, p.Y, 0);
             keyPressed = false;
         }
     }
