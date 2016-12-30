@@ -1,14 +1,14 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using ProjectSpace.Models;
 
-namespace ProjectSpace
+namespace ProjectSpace.Controllers
 {
     public class Player : MonoBehaviour
     {
 
         private GameController gameController;
-        public bool keyPressed = false;
+        private bool keyPressed = false;
+        public bool placingRoom = false;
 
         // Use this for initialization
         void Start()
@@ -19,9 +19,10 @@ namespace ProjectSpace
         // Update is called once per frame
         void Update()
         {
-            Point p = new Point(transform.position.x, transform.position.y);
+            float x = transform.position.x;
+            float y = transform.position.y;
             MoveDirection moveDirection = MoveDirection.NORTH;
-            Room originRoom = gameController.getRoomAt(p);
+            Room originRoom = gameController.GameBoard.getRoomAt(x, y);
 
             if (Input.GetKeyDown(KeyCode.LeftArrow))
             {
@@ -29,7 +30,7 @@ namespace ProjectSpace
                 {
                     return;
                 }
-                p.X -= 1f;
+                x -= 1f;
                 keyPressed = true;
                 moveDirection = MoveDirection.WEST;
             }
@@ -39,7 +40,7 @@ namespace ProjectSpace
                 {
                     return;
                 }
-                p.X += 1f;
+                x += 1f;
                 keyPressed = true;
                 moveDirection = MoveDirection.EAST;
             }
@@ -49,7 +50,7 @@ namespace ProjectSpace
                 {
                     return;
                 }
-                p.Y += 1f;
+                y += 1f;
                 keyPressed = true;
                 moveDirection = MoveDirection.NORTH;
             }
@@ -59,26 +60,35 @@ namespace ProjectSpace
                 {
                     return;
                 }
-                p.Y -= 1f;
+                y -= 1f;
                 keyPressed = true;
                 moveDirection = MoveDirection.SOUTH;
             }
             if (keyPressed)
             {
-                Room r = gameController.getRoomAt(p);
-                if (r == null)
+                Room r = gameController.GameBoard.getRoomAt(x, y);
+
+                Room roomType = gameController.GameBoard.getRandomUnusedRoomType();
+                if (r == null && roomType != null)
                 {
-                    gameController.spawnPreviewRoomAt(p, moveDirection);
+                    placingRoom = true;
+                    gameController.spawnPreviewRoomAt(roomType, x, y, moveDirection);
                 }
-                else
+                else if (r != null)
                 {
-                    handleMoveToExistingRoom(r, p, moveDirection);
+                    handleMoveToExistingRoom(r, x, y, moveDirection);
                 }
+                else if (roomType == null)
+                {
+                    Debug.LogWarning("Out of rooms!");
+                }
+                keyPressed = false;
             }
         }
 
-        private void handleMoveToExistingRoom(Room targetRoom, Point p, MoveDirection direction)
+        private void handleMoveToExistingRoom(Room targetRoom, float x, float y, MoveDirection direction)
         {
+            Point p = new Point(x, y);
             if ((direction == MoveDirection.NORTH && targetRoom.HasSouthExit)
                 || (direction == MoveDirection.WEST && targetRoom.HasEastExit)
                 || (direction == MoveDirection.SOUTH && targetRoom.HasNorthExit)
@@ -90,7 +100,6 @@ namespace ProjectSpace
             {
                 Debug.LogWarningFormat("Can't move to room at position [{0}, {1}], moving in direction {2}", p.X, p.Y, direction);
             }
-            keyPressed = false;
         }
     }
 }
