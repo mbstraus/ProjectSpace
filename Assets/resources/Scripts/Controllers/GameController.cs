@@ -1,134 +1,155 @@
-﻿using System.Collections.Generic;
+﻿#region License
+// ==============================================================================
+// Project Space Copyright (C) 2016 Mathew Strauss
+// ==============================================================================
+#endregion
+
+using System.Collections.Generic;
 using UnityEngine;
 using ProjectSpace.Models;
 
-namespace ProjectSpace.Controllers
-{
-    public enum MoveDirection { NORTH, SOUTH, EAST, WEST };
+namespace ProjectSpace.Controllers {
 
-    public class GameController : MonoBehaviour
-    {
+    /// <summary>
+    /// Game Controller game object. Handles the visual aspects of the game board.
+    /// </summary>
+    public class GameController : MonoBehaviour {
+        /// <summary>
+        /// Represents the player game object that will be instantiated.
+        /// </summary>
         public GameObject playerPrefab;
+        /// <summary>
+        /// Game object model that handles all of the logic dealing with manipulating the game board.
+        /// </summary>
         public GameBoard GameBoard { get; private set; }
 
+        /// <summary>
+        /// Dictionary containing a look-up for all of the game objects in the game world representing the game board. Indexed by the room name.
+        /// </summary>
         private Dictionary<string, GameObject> roomGameObjects;
+        /// <summary>
+        /// Dictionary containing a look-up for all of the room prefab objects, used for instantiating rooms. Indexed by the room name.
+        /// </summary>
         private Dictionary<string, GameObject> roomPrefabs;
-        private GameObject player;
+        /// <summary>
+        /// Direction in which the player is currently moving for a preview room.
+        /// </summary>
         private MoveDirection moveDirection;
-
+        /// <summary>
+        /// Room representing the preview room being currently manipulated.
+        /// </summary>
         private Room previewRoom;
+        /// <summary>
+        /// Game object representing the preview room being currently manipulated.
+        /// </summary>
         private GameObject previewRoomGameObject;
 
         /// <summary>
         /// Runs at startup, initialization
         /// </summary>
-        void Start()
-        {
+        void Start() {
             GameBoard = new GameBoard();
+            GameBoard.registerSpawnPreviewRoomAction(spawnPreviewRoomAt);
+            GameBoard.registerRotatePreviewRoomHandler(rotatePreviewRoom);
+            GameBoard.registerSpawnRoomHandler(spawnRoom);
+            GameBoard.registerPlayerSpawnHandler(spawnPlayer);
             Object[] resources = Resources.LoadAll("Prefabs/Rooms");
             roomPrefabs = new Dictionary<string, GameObject>();
-            for (int i = 0; i < resources.Length; i++)
-            {
-                if (resources[i] is GameObject)
-                {
-                    GameObject go = (GameObject)resources[i];
+            for (int i = 0; i < resources.Length; i++) {
+                if (resources[i] is GameObject) {
+                    GameObject go = (GameObject) resources[i];
                     roomPrefabs.Add(go.name, go);
                     Room r = null;
                     // TODO: This should be loaded from a file
-                    if (go.name.Equals("NorthAirlock"))
-                    {
+                    if (go.name.Equals("NorthAirlock")) {
                         r = new Room(go.name, false, true, true, false, true);
-                    }
-                    else if (go.name.Equals("WestAirlock"))
-                    {
+                    } else if (go.name.Equals("WestAirlock")) {
                         r = new Room(go.name, false, true, true, true, false);
-                    }
-                    else if (go.name.Equals("SouthAirlock"))
-                    {
+                    } else if (go.name.Equals("SouthAirlock")) {
                         r = new Room(go.name, false, false, true, true, true);
-                    }
-                    else if (go.name.Equals("EastAirlock"))
-                    {
+                    } else if (go.name.Equals("EastAirlock")) {
                         r = new Room(go.name, false, true, true, true, false);
-                    }
-                    else if (go.name.Equals("CurvedHallway"))
-                    {
+                    } else if (go.name.Equals("CurvedHallway")) {
                         r = new Room(go.name, false, true, true, false, false);
-                    }
-                    else if (go.name.Equals("Crossroad"))
-                    {
+                    } else if (go.name.Equals("Crossroad")) {
                         r = new Room(go.name, false, true, true, true, true);
                     }
-                    this.GameBoard.addRoomType(r);
+                    GameBoard.addRoomType(r);
                 }
             }
-
-            roomGameObjects = new Dictionary<string, GameObject>();
-
-            spawnRoom("NorthAirlock", 0, 2, true, true, false, true);
-            spawnRoom("WestAirlock", -2, 0, true, true, true, false);
-            spawnRoom("SouthAirlock", 0, -2, false, true, true, true);
-            spawnRoom("EastAirlock", 2, 0, true, false, true, true);
-
-            player = Instantiate(playerPrefab, new Vector3(0f, 2f, 0f), Quaternion.identity);
+            GameBoard.registerInitializeGameBoardHandler(initializeGameBoard);
+            GameBoard.initializeNewGameBoard();
         }
 
         /// <summary>
         /// Runs every frame
         /// </summary>
-        void Update()
-        {
-            if (previewRoomGameObject != null)
-            {
-                if (Input.GetKeyDown(KeyCode.R))
-                {
-                    rotatePreviewRoom();
+        void Update() {
+            if (previewRoomGameObject != null) {
+                if (Input.GetKeyDown(KeyCode.R)) {
+                    GameBoard.rotatePreviewRoom(previewRoom);
                 }
-                if (Input.GetKeyDown(KeyCode.Space))
-                {
-                    if (canSpawnRoom())
-                    {
-                        spawnRoomFromPreview();
+                if (Input.GetKeyDown(KeyCode.Space)) {
+                    if (GameBoard.canSpawnRoom(moveDirection, previewRoom)) {
+                        GameBoard.spawnRoom(previewRoom.Name, previewRoom.Point.X, previewRoom.Point.Y, previewRoom.HasNorthExit, previewRoom.HasWestExit, previewRoom.HasSouthExit, previewRoom.HasEastExit, true);
                     }
                 }
             }
         }
 
         /// <summary>
-        /// Spawns a new room at the specified coordinates, and initializes it with the specified exits.
+        /// Initializes the game board for a new game. Clears any existing rooms from the game world.
         /// </summary>
-        /// <param name="name">Name of the room prefab to spawn.</param>
-        /// <param name="x">X coordinate to place the room at</param>
-        /// <param name="y">Y coordinate to place the room at</param>
-        /// <param name="hasNorthExit">If true, the room has a north-facing exit</param>
-        /// <param name="hasWestExit">If true, the room has a west-facing exit</param>
-        /// <param name="hasSouthExit">If true, the room has a south-facing exit</param>
-        /// <param name="hasEastExit">If true, the room has a east-facing exit</param>
-        /// <returns>Instantiated game object representing the new room</returns>
-        public GameObject spawnRoom(string name, float x, float y, bool hasNorthExit, bool hasWestExit, bool hasSouthExit, bool hasEastExit)
-        {
-            Point point = new Point(x, y);
-            GameObject roomGameObjectPrefab = null;
-            roomPrefabs.TryGetValue(name, out roomGameObjectPrefab);
-            GameObject roomGameObject = Instantiate(roomGameObjectPrefab, new Vector3(x, y, 0f), Quaternion.identity);
-            Room room = new Room(name, point, hasNorthExit, hasWestExit, hasSouthExit, hasEastExit);
-            GameBoard.addRoom(point, room);
-            roomGameObjects.Add(name, roomGameObject);
-            GameBoard.markRoomAsUsed(name);
-            return roomGameObject;
+        public void initializeGameBoard() {
+            // TODO: Should this be responsible for clearing out the players too?  Probably
+            // Clear out any existing rooms here.
+            if (roomGameObjects != null) {
+                foreach (GameObject roomGameObject in roomGameObjects.Values) {
+                    Destroy(roomGameObject);
+                }
+            }
+            roomGameObjects = new Dictionary<string, GameObject>();
+            previewRoom = null;
+            previewRoomGameObject = null;
+            moveDirection = MoveDirection.NONE;
         }
 
         /// <summary>
-        /// Instantiates a real room at the position of the preview. This assumes that the room is in the correct orientation and can
-        /// be placed at the preview's location. This will also clear the room preview from the world.
+        /// Spawns a player at the specified X and Y location.
         /// </summary>
-        public void spawnRoomFromPreview()
-        {
+        /// <param name="playerIndex">Player's index, 1 - 4, representing the player being spawned</param>
+        /// <param name="x">X position of the room the player is being spawned at</param>
+        /// <param name="y">Y position of the room the player is being spawned at</param>
+        public void spawnPlayer(int playerIndex, float x, float y) {
+            // TODO: Maybe have anchor points for each player?  This will result in the players being on top of each other if I keep it this way.
+            Instantiate(playerPrefab, new Vector3(x, y, 0f), Quaternion.identity);
+            // TODO: Need to do more initialization stuff here for the player
+        }
+
+        /// <summary>
+        /// Spawns a room at the specified point. If the room is being spawned from a preview, the preview room will be removed.
+        /// </summary>
+        /// <param name="name">Name of the room prefab being spawned</param>
+        /// <param name="p">Point in the world where the room is being spawned</param>
+        /// <param name="isFromPreview">If true, the room is being spawned from a preview room (player discovered)</param>
+        private void spawnRoom(string name, Point p, bool isFromPreview) {
+            GameObject roomGameObjectPrefab = null;
+            roomPrefabs.TryGetValue(name, out roomGameObjectPrefab);
+            GameObject roomGameObject = Instantiate(roomGameObjectPrefab, new Vector3(p.X, p.Y, 0f), Quaternion.identity);
+            if (isFromPreview) {
+                spawnRoomFromPreview(roomGameObject);
+            }
+            roomGameObjects.Add(name, roomGameObject);
+        }
+
+        /// <summary>
+        /// Handles the additional logic of spawning a room from a preview. Removes the preview room and orients the new room to
+        /// the same rotation as the preview room.
+        /// </summary>
+        /// <param name="spawningRoomGameObject">Game object representing the new room</param>
+        private void spawnRoomFromPreview(GameObject spawningRoomGameObject) {
             Transform t = previewRoomGameObject.transform;
-            GameObject go = spawnRoom(previewRoom.Name, t.position.x, t.position.y, previewRoom.HasNorthExit, previewRoom.HasWestExit, previewRoom.HasSouthExit, previewRoom.HasEastExit);
-            go.transform.rotation = t.rotation;
-            player.GetComponent<Player>().placingRoom = false;
-            player.transform.position = t.position;
+            spawningRoomGameObject.transform.rotation = t.rotation;
 
             Destroy(previewRoomGameObject);
             previewRoom = null;
@@ -139,11 +160,11 @@ namespace ProjectSpace.Controllers
         /// Spawns a "preview" room at the specified X and Y coordinates. The preview room is a slightly transparent version of the real
         /// room, and can be rotated in order for it to have a valid enterance according to the direction the player is moving in.
         /// </summary>
+        /// <param name="roomType">Room type of the room to spawn the preview for</param>
         /// <param name="x">X location to spawn the preview at</param>
         /// <param name="y">Y location to spawn the preview at</param>
         /// <param name="moveDirectionAttempted">Move direction the player is moving into the room at</param>
-        public void spawnPreviewRoomAt(Room roomType, float x, float y, MoveDirection moveDirectionAttempted)
-        {
+        public void spawnPreviewRoomAt(Room roomType, float x, float y, MoveDirection moveDirectionAttempted) {
             Point p = new Point(x, y);
             GameObject roomPrefab = null;
 
@@ -151,16 +172,13 @@ namespace ProjectSpace.Controllers
 
             GameObject go = Instantiate(roomPrefab, new Vector3(p.X, p.Y, 0f), Quaternion.identity);
             SpriteRenderer renderer = null;
-            for (int i = 0; i < go.transform.childCount; i++)
-            {
+            for (int i = 0; i < go.transform.childCount; i++) {
                 Transform child = go.transform.GetChild(i);
-                if (child.tag == "RoomVisual")
-                {
+                if (child.tag == "RoomVisual") {
                     renderer = child.GetComponent<SpriteRenderer>();
                 }
             }
-            if (renderer == null)
-            {
+            if (renderer == null) {
                 Debug.LogError("Couldn't find sprite renderer of room prefab!");
                 return;
             }
@@ -176,49 +194,11 @@ namespace ProjectSpace.Controllers
         }
 
         /// <summary>
-        /// Rotates the currently active preview room 90 degrees. This will update the game object's rotation, as well
-        /// as modifying the exits to reflect the new orientation.
+        /// Rotates the currently active preview room 90 degrees.
         /// </summary>
-        public void rotatePreviewRoom()
-        {
+        public void rotatePreviewRoom() {
+            // TODO: Should probably allow for reverse rotation here too.
             previewRoomGameObject.transform.Rotate(new Vector3(0, 0, 90));
-
-            bool oldNorth = previewRoom.HasNorthExit;
-            bool oldWest = previewRoom.HasWestExit;
-            bool oldSouth = previewRoom.HasSouthExit;
-            bool oldEast = previewRoom.HasEastExit;
-
-            previewRoom.HasNorthExit = oldEast;
-            previewRoom.HasWestExit = oldNorth;
-            previewRoom.HasSouthExit = oldWest;
-            previewRoom.HasEastExit = oldSouth;
-        }
-
-        /// <summary>
-        /// Determines whether the current room preview's position and orientation, taking the player's move direction into
-        /// account, is a valid position to place a room.
-        /// </summary>
-        /// <returns>True if the preview room can be placed as a real room</returns>
-        public bool canSpawnRoom()
-        {
-            if (moveDirection == MoveDirection.NORTH && previewRoom.HasSouthExit)
-            {
-                return true;
-            }
-            if (moveDirection == MoveDirection.WEST && previewRoom.HasEastExit)
-            {
-                return true;
-            }
-            if (moveDirection == MoveDirection.SOUTH && previewRoom.HasNorthExit)
-            {
-                return true;
-            }
-            if (moveDirection == MoveDirection.EAST && previewRoom.HasWestExit)
-            {
-                return true;
-            }
-            Debug.LogWarning("Can't place room here, exits are not connected!");
-            return false;
         }
     }
 }

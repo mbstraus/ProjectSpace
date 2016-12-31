@@ -1,38 +1,65 @@
-﻿namespace ProjectSpace.Models
-{
-    public class Point
-    {
-        public Point()
-        {
+﻿#region License
+// ==============================================================================
+// Project Space Copyright (C) 2016 Mathew Strauss
+// ==============================================================================
+#endregion
 
-        }
+using System.Runtime.CompilerServices;
 
-        public Point(float x, float y)
-        {
-            this.X = x;
-            this.Y = y;
-        }
-        
+namespace ProjectSpace.Models {
+    /// <summary>
+    /// Represents a point on the game board, determined by an X and Y position.
+    /// </summary>
+    public class Point {
+
+        /// <summary>
+        /// X position of the point.
+        /// </summary>
         public float X { get; set; }
+        /// <summary>
+        /// Y position of the point.
+        /// </summary>
         public float Y { get; set; }
 
-        public override bool Equals(object obj)
-        {
-            if (obj == null)
-            {
-                return false;
-            }
-            if (base.Equals(obj))
-            {
-                return true;
-            }
-            Point otherPoint = (Point)obj;
-            return this.X == otherPoint.X && this.Y == otherPoint.Y;
+        /// <summary>
+        /// Default Constructor
+        /// </summary>
+        public Point() {
+
         }
 
-        public override int GetHashCode()
-        {
-            return this.X.GetHashCode() + this.Y.GetHashCode();
+        /// <summary>
+        /// Constructor that initializes the starting X and Y values.
+        /// </summary>
+        /// <param name="x">X position of the point</param>
+        /// <param name="y">Y position of the point</param>
+        public Point(float x, float y) {
+            X = x;
+            Y = y;
+        }
+        
+        /// <summary>
+        /// Determines the equality of two points. Equality is determined by the X and Y values.
+        /// </summary>
+        /// <param name="obj">Other point to compare</param>
+        /// <returns>True if equal</returns>
+        public override bool Equals(object obj) {
+            if (obj == null) {
+                return false;
+            }
+            if (ReferenceEquals(this, obj)) {
+                return true;
+            }
+            Point otherPoint = (Point) obj;
+            return RuntimeHelpers.Equals(X, otherPoint.X) && RuntimeHelpers.Equals(Y, otherPoint.Y);
+        }
+
+        /// <summary>
+        /// Gets the hascode of the point, defined by the X and Y values.
+        /// </summary>
+        /// <returns>Hashcode of the point</returns>
+        public override int GetHashCode() {
+            return X.GetHashCode() + Y.GetHashCode();
         }
     }
 }

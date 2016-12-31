@@ -1,104 +1,81 @@
-﻿using UnityEngine;
+﻿#region License
+// ==============================================================================
+// Project Space Copyright (C) 2016 Mathew Strauss
+// ==============================================================================
+#endregion
+
+using UnityEngine;
 using ProjectSpace.Models;
 
-namespace ProjectSpace.Controllers
-{
-    public class Player : MonoBehaviour
-    {
-
+namespace ProjectSpace.Controllers {
+    /// <summary>
+    /// Represents the Player game object.
+    /// </summary>
+    public class Player : MonoBehaviour {
+        /// <summary>
+        /// Pointer to the game controller game object that holds the game board state.
+        /// </summary>
         private GameController gameController;
+        /// <summary>
+        /// If true, the move key was pressed.
+        /// </summary>
         private bool keyPressed = false;
-        public bool placingRoom = false;
 
-        // Use this for initialization
-        void Start()
-        {
+        /// <summary>
+        /// Use for initialization
+        /// </summary>
+        void Start() {
             gameController = FindObjectOfType<GameController>();
+            gameController.GameBoard.registerExistingRoomMoveAction(handleMoveToExistingRoom);
+            gameController.GameBoard.registerSpawnRoomHandler(handleMoveToNewRoom);
         }
 
-        // Update is called once per frame
-        void Update()
-        {
-            float x = transform.position.x;
-            float y = transform.position.y;
-            MoveDirection moveDirection = MoveDirection.NORTH;
-            Room originRoom = gameController.GameBoard.getRoomAt(x, y);
-
-            if (Input.GetKeyDown(KeyCode.LeftArrow))
-            {
-                if (originRoom.HasWestExit == false)
-                {
-                    return;
+        /// <summary>
+        /// Update is called once per frame
+        /// </summary>
+        void Update() {
+            if (gameController.GameBoard.IsPlacingRoom == false) {
+                MoveDirection moveDirection = MoveDirection.NONE;
+                if (Input.GetKeyDown(KeyCode.LeftArrow)) {
+                    moveDirection = MoveDirection.WEST;
+                    keyPressed = true;
+                } else if (Input.GetKeyDown(KeyCode.RightArrow)) {
+                    moveDirection = MoveDirection.EAST;
+                    keyPressed = true;
+                } else if (Input.GetKeyDown(KeyCode.UpArrow)) {
+                    moveDirection = MoveDirection.NORTH;
+                    keyPressed = true;
+                } else if (Input.GetKeyDown(KeyCode.DownArrow)) {
+                    moveDirection = MoveDirection.SOUTH;
+                    keyPressed = true;
                 }
-                x -= 1f;
-                keyPressed = true;
-                moveDirection = MoveDirection.WEST;
-            }
-            if (Input.GetKeyDown(KeyCode.RightArrow))
-            {
-                if (originRoom.HasEastExit == false)
-                {
-                    return;
+                if (keyPressed) {
+                    gameController.GameBoard.beginMoveIntoRoom(transform.position.x, transform.position.y, moveDirection);
+                    keyPressed = false;
                 }
-                x += 1f;
-                keyPressed = true;
-                moveDirection = MoveDirection.EAST;
-            }
-            if (Input.GetKeyDown(KeyCode.UpArrow))
-            {
-                if (originRoom.HasNorthExit == false)
-                {
-                    return;
-                }
-                y += 1f;
-                keyPressed = true;
-                moveDirection = MoveDirection.NORTH;
-            }
-            if (Input.GetKeyDown(KeyCode.DownArrow))
-            {
-                if (originRoom.HasSouthExit == false)
-                {
-                    return;
-                }
-                y -= 1f;
-                keyPressed = true;
-                moveDirection = MoveDirection.SOUTH;
-            }
-            if (keyPressed)
-            {
-                Room r = gameController.GameBoard.getRoomAt(x, y);
-
-                Room roomType = gameController.GameBoard.getRandomUnusedRoomType();
-                if (r == null && roomType != null)
-                {
-                    placingRoom = true;
-                    gameController.spawnPreviewRoomAt(roomType, x, y, moveDirection);
-                }
-                else if (r != null)
-                {
-                    handleMoveToExistingRoom(r, x, y, moveDirection);
-                }
-                else if (roomType == null)
-                {
-                    Debug.LogWarning("Out of rooms!");
-                }
-                keyPressed = false;
             }
         }
 
-        private void handleMoveToExistingRoom(Room targetRoom, float x, float y, MoveDirection direction)
-        {
-            Point p = new Point(x, y);
-            if ((direction == MoveDirection.NORTH && targetRoom.HasSouthExit)
-                || (direction == MoveDirection.WEST && targetRoom.HasEastExit)
-                || (direction == MoveDirection.SOUTH && targetRoom.HasNorthExit)
-                || (direction == MoveDirection.EAST && targetRoom.HasWestExit))
-            {
-                this.transform.position = new Vector3(p.X, p.Y, 0);
-            }
-            else
-            {
-                Debug.LogWarningFormat("Can't move to room at position [{0}, {1}], moving in direction {2}", p.X, p.Y, direction);
+        /// <summary>
+        /// Callback for when the player moves into an existing room. Moves the player model to the room.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        private void handleMoveToExistingRoom(float x, float y) {
+            transform.position = new Vector3(x, y, 0);
+        }
+
+        /// <summary>
+        /// Callback for when the player moves into a new room. Only does the move if the room is being spawned
+        /// from a preview.
+        /// </summary>
+        /// <param name="roomName">Name of the room (unused, from callback call)</param>
+        /// <param name="p">Point of the new room</param>
+        /// <param name="isFromPreview">If true, the room is spawned from a preview</param>
+        private void handleMoveToNewRoom(string roomName, Point p, bool isFromPreview) {
+            // TODO: Check player index
+            if (isFromPreview) {
+                transform.position = new Vector3(p.X, p.Y, 0);
             }
         }
     }

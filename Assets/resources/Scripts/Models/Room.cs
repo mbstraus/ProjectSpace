@@ -1,18 +1,63 @@
-﻿using System;
+﻿#region License
+// ==============================================================================
+// Project Space Copyright (C) 2016 Mathew Strauss
+// ==============================================================================
+#endregion
+
 using System.Runtime.CompilerServices;
 
-namespace ProjectSpace.Models
-{
-    public class Room
-    {
+namespace ProjectSpace.Models {
+    /// <summary>
+    /// Represents a room on the game board.
+    /// </summary>
+    public class Room {
 
-        public Room()
-        {
+        /// <summary>
+        /// Name of the room
+        /// </summary>
+        public string Name { get; set; }
+        /// <summary>
+        /// If true, the room has a North facing exit
+        /// </summary>
+        public bool HasNorthExit { get; set; }
+        /// <summary>
+        /// If true, the room has a West facing exit
+        /// </summary>
+        public bool HasWestExit { get; set; }
+        /// <summary>
+        /// If true, the room has a South facing exit
+        /// </summary>
+        public bool HasSouthExit { get; set; }
+        /// <summary>
+        /// If true, the room has an East facing exit
+        /// </summary>
+        public bool HasEastExit { get; set; }
+        /// <summary>
+        /// Point on the game board that the room is being placed (X & Y position)
+        /// </summary>
+        public Point Point { get; set; }
+        /// <summary>
+        /// If true, the room has been placed on the game board
+        /// </summary>
+        public bool HasBeenPlaced { get; set; }
+
+        /// <summary>
+        /// Default Constructor.
+        /// </summary>
+        public Room() {
 
         }
 
-        public Room(string roomName, Point p, bool hasNorthExit, bool hasWestExit, bool hasSouthExit, bool hasEastExit)
-        {
+        /// <summary>
+        /// Constructor used for when a room exists on the game board at an X and Y position.
+        /// </summary>
+        /// <param name="roomName">Name of the room</param>
+        /// <param name="p">Point on the game board that the room is being placed (X & Y position)</param>
+        /// <param name="hasNorthExit">If true, the room has a North facing exit</param>
+        /// <param name="hasWestExit">If true, the room has a West facing exit</param>
+        /// <param name="hasSouthExit">If true, the room has a South facing exit</param>
+        /// <param name="hasEastExit">If true, the room has an East facing exit</param>
+        public Room(string roomName, Point p, bool hasNorthExit, bool hasWestExit, bool hasSouthExit, bool hasEastExit) {
             this.Name = roomName;
             this.HasNorthExit = hasNorthExit;
             this.HasWestExit = hasWestExit;
@@ -21,8 +66,16 @@ namespace ProjectSpace.Models
             this.Point = p;
         }
 
-        public Room(string roomName, bool hasBeenPlaced, bool hasNorthExit, bool hasWestExit, bool hasSouthExit, bool hasEastExit)
-        {
+        /// <summary>
+        /// Constructor used for defining a type of room, that hasn't been placed on the game board.
+        /// </summary>
+        /// <param name="roomName">Name of the room</param>
+        /// <param name="hasBeenPlaced">If true, the room has been placed on the game board</param>
+        /// <param name="hasNorthExit">If true, the room has a North facing exit</param>
+        /// <param name="hasWestExit">If true, the room has a West facing exit</param>
+        /// <param name="hasSouthExit">If true, the room has a South facing exit</param>
+        /// <param name="hasEastExit">If true, the room has an East facing exit</param>
+        public Room(string roomName, bool hasBeenPlaced, bool hasNorthExit, bool hasWestExit, bool hasSouthExit, bool hasEastExit) {
             this.Name = roomName;
             this.HasNorthExit = hasNorthExit;
             this.HasWestExit = hasWestExit;
@@ -31,31 +84,28 @@ namespace ProjectSpace.Models
             this.HasBeenPlaced = hasBeenPlaced;
         }
 
-        public string Name { get; set; }
-        public bool HasNorthExit { get; set; }
-        public bool HasWestExit { get; set; }
-        public bool HasSouthExit { get; set; }
-        public bool HasEastExit { get; set; }
-        public Point Point { get; set; }
-        public bool HasBeenPlaced { get; set; }
-
-        public override bool Equals(object obj)
-        {
-            if (obj == null)
-            {
+        /// <summary>
+        /// Determines equality of two rooms. Equality is determined by the name of the room, and the position of the room in the game board.
+        /// </summary>
+        /// <param name="obj">Other object to check for equality</param>
+        /// <returns>True if equal</returns>
+        public override bool Equals(object obj) {
+            if (obj == null) {
                 return false;
             }
-            if (RuntimeHelpers.ReferenceEquals(this, obj))
-            {
+            if (ReferenceEquals(this, obj)) {
                 return true;
             }
-            Room otherRoom = (Room)obj;
-            return RuntimeHelpers.Equals(this.Name, otherRoom.Name) && RuntimeHelpers.Equals(this.Point, otherRoom.Point);
+            Room otherRoom = (Room) obj;
+            return RuntimeHelpers.Equals(Name, otherRoom.Name);
         }
 
-        public override int GetHashCode()
-        {
-            return RuntimeHelpers.GetHashCode(this.Name) + RuntimeHelpers.GetHashCode(this.Point);
+        /// <summary>
+        /// Gets the hashcode of the room, determined by the name and point.
+        /// </summary>
+        /// <returns>Hashcode of the room</returns>
+        public override int GetHashCode() {
+            return Name.GetHashCode();
         }
     }
 }
