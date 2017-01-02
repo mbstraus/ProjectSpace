@@ -43,6 +43,7 @@ namespace ProjectSpace.Controllers {
         /// Game object representing the preview room being currently manipulated.
         /// </summary>
         private GameObject previewRoomGameObject;
+        private Object[] resources;
 
         /// <summary>
         /// Runs at startup, initialization
@@ -53,30 +54,15 @@ namespace ProjectSpace.Controllers {
             GameBoard.registerRotatePreviewRoomHandler(rotatePreviewRoom);
             GameBoard.registerSpawnRoomHandler(spawnRoom);
             GameBoard.registerPlayerSpawnHandler(spawnPlayer);
-            Object[] resources = Resources.LoadAll("Prefabs/Rooms");
+            resources = Resources.LoadAll("Prefabs/Rooms");
             roomPrefabs = new Dictionary<string, GameObject>();
             for (int i = 0; i < resources.Length; i++) {
                 if (resources[i] is GameObject) {
                     GameObject go = (GameObject) resources[i];
                     roomPrefabs.Add(go.name, go);
-                    Room r = null;
-                    // TODO: This should be loaded from a file
-                    if (go.name.Equals("NorthAirlock")) {
-                        r = new Room(go.name, false, true, true, false, true);
-                    } else if (go.name.Equals("WestAirlock")) {
-                        r = new Room(go.name, false, true, true, true, false);
-                    } else if (go.name.Equals("SouthAirlock")) {
-                        r = new Room(go.name, false, false, true, true, true);
-                    } else if (go.name.Equals("EastAirlock")) {
-                        r = new Room(go.name, false, true, true, true, false);
-                    } else if (go.name.Equals("CurvedHallway")) {
-                        r = new Room(go.name, false, true, true, false, false);
-                    } else if (go.name.Equals("Crossroad")) {
-                        r = new Room(go.name, false, true, true, true, true);
-                    }
-                    GameBoard.addRoomType(r);
                 }
             }
+            GameBoard.LoadRooms();
             GameBoard.registerInitializeGameBoardHandler(initializeGameBoard);
             GameBoard.initializeNewGameBoard();
         }
@@ -138,6 +124,9 @@ namespace ProjectSpace.Controllers {
             GameObject roomGameObject = Instantiate(roomGameObjectPrefab, new Vector3(p.X, p.Y, 0f), Quaternion.identity);
             if (isFromPreview) {
                 spawnRoomFromPreview(roomGameObject);
+            }
+            if (roomGameObjects.ContainsKey(name)) {
+                Debug.LogErrorFormat("Room with name {0} already exists?", name);
             }
             roomGameObjects.Add(name, roomGameObject);
         }

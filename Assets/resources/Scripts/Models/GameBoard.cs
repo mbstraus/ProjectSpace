@@ -6,6 +6,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Xml.Serialization;
 using UnityEngine;
 
 namespace ProjectSpace.Models {
@@ -82,6 +84,19 @@ namespace ProjectSpace.Models {
             // playerSpawnHandler(3, 0, -2);
             spawnRoom("EastAirlock", 2, 0, true, false, true, true, false);
             // playerSpawnHandler(4, 2, 0);
+        }
+
+        public void LoadRooms() {
+            XmlSerializer serializer = new XmlSerializer(typeof(Rooms));
+            // serializer.UnknownNode += new XmlNodeEventHandler();
+            // serializer.UnknownAttribute += new XmlAttributeEventHandler();
+            FileStream fs = new FileStream("Assets/Resources/Data/Rooms.xml", FileMode.Open);
+            Rooms rooms = (Rooms) serializer.Deserialize(fs);
+
+            foreach (Room r in rooms.RoomsArray) {
+                r.HasBeenPlaced = false;
+                roomTypes.Add(r);
+            }
         }
 
         /// <summary>

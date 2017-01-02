@@ -5,40 +5,50 @@
 #endregion
 
 using System.Runtime.CompilerServices;
+using System.Xml;
+using System.Xml.Serialization;
 
 namespace ProjectSpace.Models {
     /// <summary>
     /// Represents a room on the game board.
     /// </summary>
+    [XmlRootAttribute("Room")]
     public class Room {
 
         /// <summary>
         /// Name of the room
         /// </summary>
+        [XmlAttribute]
         public string Name { get; set; }
         /// <summary>
         /// If true, the room has a North facing exit
         /// </summary>
+        [XmlAttribute]
         public bool HasNorthExit { get; set; }
         /// <summary>
         /// If true, the room has a West facing exit
         /// </summary>
+        [XmlAttribute]
         public bool HasWestExit { get; set; }
         /// <summary>
         /// If true, the room has a South facing exit
         /// </summary>
+        [XmlAttribute]
         public bool HasSouthExit { get; set; }
         /// <summary>
         /// If true, the room has an East facing exit
         /// </summary>
+        [XmlAttribute]
         public bool HasEastExit { get; set; }
         /// <summary>
         /// Point on the game board that the room is being placed (X & Y position)
         /// </summary>
+        [XmlElement("Point", IsNullable = true)]
         public Point Point { get; set; }
         /// <summary>
         /// If true, the room has been placed on the game board
         /// </summary>
+        [XmlAttribute]
         public bool HasBeenPlaced { get; set; }
 
         /// <summary>

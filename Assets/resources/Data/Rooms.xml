@@ -1,0 +1,49 @@
+<Rooms>
+  <RoomList>
+    <Room Name="NorthAirlock" HasNorthExit="true" HasWestExit="true" HasSouthExit="false" HasEastExit="true"></Room>
+    <Room Name="SouthAirlock" HasNorthExit="false" HasWestExit="true" HasSouthExit="true" HasEastExit="true"></Room>
+    <Room Name="WestAirlock" HasNorthExit="true" HasWestExit="true" HasSouthExit="true" HasEastExit="false"></Room>
+    <Room Name="EastAirlock" HasNorthExit="true" HasWestExit="false" HasSouthExit="true" HasEastExit="true"></Room>
+    <Room Name="GlassCoveredHallway" HasNorthExit="false" HasWestExit="true" HasSouthExit="false" HasEastExit="true"></Room>
+    <Room Name="ObservationDeckAlpha" HasNorthExit="false" HasWestExit="true" HasSouthExit="false" HasEastExit="true"></Room>
+    <Room Name="GreenHouse" HasNorthExit="false" HasWestExit="true" HasSouthExit="false" HasEastExit="true"></Room>
+    <Room Name="Larder" HasNorthExit="false" HasWestExit="true" HasSouthExit="false" HasEastExit="true"></Room>
+    <Room Name="AntiGravityRoom" HasNorthExit="false" HasWestExit="true" HasSouthExit="false" HasEastExit="true"></Room>
+    <Room Name="StorageRoomAlpha" HasNorthExit="false" HasWestExit="true" HasSouthExit="false" HasEastExit="true"></Room>
+    <Room Name="EngineeringBay" HasNorthExit="false" HasWestExit="true" HasSouthExit="false" HasEastExit="true"></Room>
+    <Room Name="Museum" HasNorthExit="false" HasWestExit="true" HasSouthExit="false" HasEastExit="true"></Room>
+    <Room Name="Barracks" HasNorthExit="false" HasWestExit="true" HasSouthExit="false" HasEastExit="true"></Room>
+    <Room Name="DestroyedRoom" HasNorthExit="false" HasWestExit="true" HasSouthExit="false" HasEastExit="true"></Room>
+    <Room Name="GeneticLab" HasNorthExit="false" HasWestExit="true" HasSouthExit="false" HasEastExit="true"></Room>
+    <Room Name="ObservationDeckBeta" HasNorthExit="true" HasWestExit="true" HasSouthExit="false" HasEastExit="true"></Room>
+    <Room Name="ExerciseRoom" HasNorthExit="true" HasWestExit="true" HasSouthExit="false" HasEastExit="true"></Room>
+    <Room Name="EngineBlock" HasNorthExit="true" HasWestExit="true" HasSouthExit="false" HasEastExit="true"></Room>
+    <Room Name="MessHall" HasNorthExit="true" HasWestExit="false" HasSouthExit="false" HasEastExit="true"></Room>
+    <Room Name="Chapel" HasNorthExit="true" HasWestExit="false" HasSouthExit="false" HasEastExit="true"></Room>
+    <Room Name="TrainingRoom" HasNorthExit="true" HasWestExit="false" HasSouthExit="false" HasEastExit="true"></Room>
+    <Room Name="MedicalBay" HasNorthExit="true" HasWestExit="false" HasSouthExit="false" HasEastExit="true"></Room>
+    <Room Name="KnowledgeCenter" HasNorthExit="true" HasWestExit="false" HasSouthExit="false" HasEastExit="true"></Room>
+    <Room Name="CrewQuartersAlpha" HasNorthExit="true" HasWestExit="false" HasSouthExit="false" HasEastExit="true"></Room>
+    <Room Name="CrackedHall" HasNorthExit="true" HasWestExit="false" HasSouthExit="false" HasEastExit="true"></Room>
+    <Room Name="RoomOfDebris" HasNorthExit="true" HasWestExit="true" HasSouthExit="true" HasEastExit="true"></Room>
+    <Room Name="CommonRoom" HasNorthExit="true" HasWestExit="true" HasSouthExit="true" HasEastExit="true"></Room>
+    <Room Name="CrewQuartersBeta" HasNorthExit="true" HasWestExit="true" HasSouthExit="true" HasEastExit="true"></Room>
+    <Room Name="BrokenRoom" HasNorthExit="true" HasWestExit="true" HasSouthExit="true" HasEastExit="true"></Room>
+    <Room Name="HallwayAlpha" HasNorthExit="true" HasWestExit="true" HasSouthExit="true" HasEastExit="true"></Room>
+    <Room Name="HallwayBeta" HasNorthExit="true" HasWestExit="true" HasSouthExit="true" HasEastExit="true"></Room>
+    <Room Name="RancidRoom" HasNorthExit="true" HasWestExit="true" HasSouthExit="true" HasEastExit="true"></Room>
+    <Room Name="MessyRoom" HasNorthExit="true" HasWestExit="true" HasSouthExit="true" HasEastExit="true"></Room>
+    <Room Name="DamagedRoom" HasNorthExit="true" HasWestExit="true" HasSouthExit="true" HasEastExit="true"></Room>
+    <Room Name="StorageRoomBeta" HasNorthExit="false" HasWestExit="false" HasSouthExit="false" HasEastExit="true"></Room>
+    <Room Name="Bridge" HasNorthExit="false" HasWestExit="false" HasSouthExit="false" HasEastExit="true"></Room>
+    <Room Name="CaptainsQuarters" HasNorthExit="false" HasWestExit="false" HasSouthExit="false" HasEastExit="true"></Room>
+    <Room Name="Kitchen" HasNorthExit="false" HasWestExit="false" HasSouthExit="false" HasEastExit="true"></Room>
+    <Room Name="Capsule" HasNorthExit="false" HasWestExit="false" HasSouthExit="false" HasEastExit="true"></Room>
+    <Room Name="Safe" HasNorthExit="false" HasWestExit="false" HasSouthExit="false" HasEastExit="true"></Room>
+    <Room Name="LifeSupport" HasNorthExit="false" HasWestExit="false" HasSouthExit="false" HasEastExit="true"></Room>
+    <Room Name="CommunicationTower" HasNorthExit="false" HasWestExit="false" HasSouthExit="false" HasEastExit="true"></Room>
+    <Room Name="MeetingRoom" HasNorthExit="false" HasWestExit="false" HasSouthExit="false" HasEastExit="true"></Room>
+    <Room Name="Creamatory" HasNorthExit="false" HasWestExit="false" HasSouthExit="false" HasEastExit="true"></Room>
+    <Room Name="EscapePodBay" HasNorthExit="false" HasWestExit="false" HasSouthExit="false" HasEastExit="true"></Room>
+  </RoomList>
+</Rooms>
