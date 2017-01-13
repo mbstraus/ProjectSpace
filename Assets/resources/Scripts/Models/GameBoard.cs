@@ -25,7 +25,6 @@ namespace ProjectSpace.Models {
         /// Property representing whether the player is currently placing a room, which indicates that a preview room is currently being placed. 
         /// </summary>
         public bool IsPlacingRoom { get; protected set; }
-
         /// <summary>
         /// Dictionary of all currently placed rooms. Each room is indexed by its position in the world (X / Y coordinate)
         /// </summary>
@@ -34,6 +33,7 @@ namespace ProjectSpace.Models {
         /// List of room types available for placement.  Only one of each room type may be placed in the game board.
         /// </summary>
         private List<Room> roomTypes;
+        private List<PlayerModel> players;
         /// <summary>
         /// Callback for when a player has moved into an existing room.
         /// </summary>
@@ -57,7 +57,9 @@ namespace ProjectSpace.Models {
         /// <summary>
         /// Callback for when a player has been spawned.
         /// </summary>
-        private Action<int, float, float> playerSpawnHandler;
+        private Action<int, float, float, bool> playerSpawnHandler;
+        private Action playerUpdateHandler;
+        private Action<PlayerModel, PlayerModel> turnEndHandler;
 
         /// <summary>
         /// Default constructor.
@@ -65,6 +67,7 @@ namespace ProjectSpace.Models {
         public GameBoard() {
             rooms = new Dictionary<Point, Room>();
             roomTypes = new List<Room>();
+            players = new List<PlayerModel>();
         }
 
         /// <summary>
@@ -77,13 +80,13 @@ namespace ProjectSpace.Models {
 
             // TODO: Randomize the locations of the starting airlocks?
             spawnRoom("NorthAirlock", 0, 2, true, true, false, true, false);
-            playerSpawnHandler(1, 0, 2);
+            playerSpawnHandler(1, 0, 2, true);
             spawnRoom("WestAirlock", -2, 0, true, true, true, false, false);
-            // playerSpawnHandler(2, -2, 0);
+            playerSpawnHandler(2, -2, 0, false);
             spawnRoom("SouthAirlock", 0, -2, false, true, true, true, false);
-            // playerSpawnHandler(3, 0, -2);
+            playerSpawnHandler(3, 0, -2, false);
             spawnRoom("EastAirlock", 2, 0, true, false, true, true, false);
-            // playerSpawnHandler(4, 2, 0);
+            playerSpawnHandler(4, 2, 0, false);
         }
 
         public void LoadRooms() {
@@ -127,6 +130,10 @@ namespace ProjectSpace.Models {
         /// <param name="r">Room to add as a room type</param>
         public void addRoomType(Room r) {
             roomTypes.Add(r);
+        }
+
+        public void addPlayer(PlayerModel player) {
+            players.Add(player);
         }
 
         /// <summary>
@@ -289,6 +296,26 @@ namespace ProjectSpace.Models {
 
             spawnRoomHandler(name, point, isFromPreview);
             IsPlacingRoom = false;
+            if (isFromPreview) {
+                playerTurnEnd();
+            }
+        }
+
+        public void handlePlayerUpdate() {
+            if (playerUpdateHandler != null) {
+                playerUpdateHandler();
+            }
+        }
+
+        public void playerTurnEnd() {
+            for (int i = 0; i < players.Count; i++) {
+                PlayerModel p = players[i];
+                if (p.IsActive) {
+                    PlayerModel nextPlayer = players[(i + 1) % players.Count];
+                    turnEndHandler(p, nextPlayer);
+                    break;
+                }
+            }
         }
 
         /// <summary>
@@ -375,7 +402,7 @@ namespace ProjectSpace.Models {
         /// Registers a new callback for when a player is spawned.
         /// </summary>
         /// <param name="handler">Handler to register</param>
-        public void registerPlayerSpawnHandler(Action<int, float, float> handler) {
+        public void registerPlayerSpawnHandler(Action<int, float, float, bool> handler) {
             playerSpawnHandler += handler;
         }
 
@@ -383,8 +410,24 @@ namespace ProjectSpace.Models {
         /// Unregisters a callback for when a player is spawned.
         /// </summary>
         /// <param name="handler">Handler to unregister</param>
-        public void unregisterPlayerSpawnHandler(Action<int, float, float> handler) {
+        public void unregisterPlayerSpawnHandler(Action<int, float, float, bool> handler) {
             playerSpawnHandler -= handler;
+        }
+
+        public void registerPlayerUpdateHandler(Action handler) {
+            playerUpdateHandler += handler;
+        }
+
+        public void unregisterPlayerUpdateHandler(Action handler) {
+            playerUpdateHandler -= handler;
+        }
+
+        public void registerTurnEndHandler(Action<PlayerModel, PlayerModel> handler) {
+            turnEndHandler += handler;
+        }
+
+        public void unregisterTurnEndHandler(Action<PlayerModel, PlayerModel> handler) {
+            turnEndHandler -= handler;
         }
     }
 }

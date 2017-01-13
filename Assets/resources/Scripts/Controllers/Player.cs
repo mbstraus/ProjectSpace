@@ -26,14 +26,15 @@ namespace ProjectSpace.Controllers {
         /// </summary>
         void Start() {
             gameController = FindObjectOfType<GameController>();
-            gameController.GameBoard.registerExistingRoomMoveAction(handleMoveToExistingRoom);
-            gameController.GameBoard.registerSpawnRoomHandler(handleMoveToNewRoom);
         }
 
         /// <summary>
         /// Update is called once per frame
         /// </summary>
         void Update() {
+        }
+
+        public void playerUpdate() {
             if (gameController.GameBoard.IsPlacingRoom == false) {
                 MoveDirection moveDirection = MoveDirection.NONE;
                 if (Input.GetKeyDown(KeyCode.LeftArrow)) {
@@ -61,7 +62,7 @@ namespace ProjectSpace.Controllers {
         /// </summary>
         /// <param name="x"></param>
         /// <param name="y"></param>
-        private void handleMoveToExistingRoom(float x, float y) {
+        public void handleMoveToExistingRoom(float x, float y) {
             transform.position = new Vector3(x, y, 0);
         }
 
@@ -72,7 +73,7 @@ namespace ProjectSpace.Controllers {
         /// <param name="roomName">Name of the room (unused, from callback call)</param>
         /// <param name="p">Point of the new room</param>
         /// <param name="isFromPreview">If true, the room is spawned from a preview</param>
-        private void handleMoveToNewRoom(string roomName, Point p, bool isFromPreview) {
+        public void handleMoveToNewRoom(string roomName, Point p, bool isFromPreview) {
             // TODO: Check player index
             if (isFromPreview) {
                 transform.position = new Vector3(p.X, p.Y, 0);

@@ -22,7 +22,6 @@ namespace ProjectSpace.Controllers {
         /// Game object model that handles all of the logic dealing with manipulating the game board.
         /// </summary>
         public GameBoard GameBoard { get; private set; }
-
         /// <summary>
         /// Dictionary containing a look-up for all of the game objects in the game world representing the game board. Indexed by the room name.
         /// </summary>
@@ -31,6 +30,7 @@ namespace ProjectSpace.Controllers {
         /// Dictionary containing a look-up for all of the room prefab objects, used for instantiating rooms. Indexed by the room name.
         /// </summary>
         private Dictionary<string, GameObject> roomPrefabs;
+        private Dictionary<int, GameObject> playerGameObjects;
         /// <summary>
         /// Direction in which the player is currently moving for a preview room.
         /// </summary>
@@ -50,10 +50,12 @@ namespace ProjectSpace.Controllers {
         /// </summary>
         void Start() {
             GameBoard = new GameBoard();
+            playerGameObjects = new Dictionary<int, GameObject>();
             GameBoard.registerSpawnPreviewRoomAction(spawnPreviewRoomAt);
             GameBoard.registerRotatePreviewRoomHandler(rotatePreviewRoom);
             GameBoard.registerSpawnRoomHandler(spawnRoom);
             GameBoard.registerPlayerSpawnHandler(spawnPlayer);
+            GameBoard.registerTurnEndHandler(handlePlayerTurnEnd);
             resources = Resources.LoadAll("Prefabs/Rooms");
             roomPrefabs = new Dictionary<string, GameObject>();
             for (int i = 0; i < resources.Length; i++) {
@@ -81,6 +83,7 @@ namespace ProjectSpace.Controllers {
                     }
                 }
             }
+            GameBoard.handlePlayerUpdate();
         }
 
         /// <summary>
@@ -106,10 +109,40 @@ namespace ProjectSpace.Controllers {
         /// <param name="playerIndex">Player's index, 1 - 4, representing the player being spawned</param>
         /// <param name="x">X position of the room the player is being spawned at</param>
         /// <param name="y">Y position of the room the player is being spawned at</param>
-        public void spawnPlayer(int playerIndex, float x, float y) {
+        public void spawnPlayer(int playerIndex, float x, float y, bool isActive) {
             // TODO: Maybe have anchor points for each player?  This will result in the players being on top of each other if I keep it this way.
-            Instantiate(playerPrefab, new Vector3(x, y, 0f), Quaternion.identity);
-            // TODO: Need to do more initialization stuff here for the player
+            GameObject player = Instantiate(playerPrefab, new Vector3(x, y, 0f), Quaternion.identity);
+            playerGameObjects.Add(playerIndex, player);
+
+            PlayerModel playerModel = new PlayerModel(playerIndex, isActive);
+            GameBoard.addPlayer(playerModel);
+
+            if (isActive == true) {
+                Player p = player.GetComponent<Player>();
+                GameBoard.registerPlayerUpdateHandler(p.playerUpdate);
+                GameBoard.registerExistingRoomMoveAction(p.handleMoveToExistingRoom);
+                GameBoard.registerSpawnRoomHandler(p.handleMoveToNewRoom);
+            }
+        }
+
+        public void handlePlayerTurnEnd(PlayerModel currentPlayer, PlayerModel nextPlayer) {
+            GameObject currentPlayerGO = null, nextPlayerGO = null;
+            playerGameObjects.TryGetValue(currentPlayer.PlayerNumber, out currentPlayerGO);
+            playerGameObjects.TryGetValue(nextPlayer.PlayerNumber, out nextPlayerGO);
+
+            Player currentPlayerComponent = currentPlayerGO.GetComponent<Player>();
+            Player nextPlayerComponent = nextPlayerGO.GetComponent<Player>();
+
+            GameBoard.unregisterPlayerUpdateHandler(currentPlayerComponent.playerUpdate);
+            GameBoard.unregisterExistingRoomMoveAction(currentPlayerComponent.handleMoveToExistingRoom);
+            GameBoard.unregisterSpawnRoomHandler(currentPlayerComponent.handleMoveToNewRoom);
+
+            GameBoard.registerPlayerUpdateHandler(nextPlayerComponent.playerUpdate);
+            GameBoard.registerExistingRoomMoveAction(nextPlayerComponent.handleMoveToExistingRoom);
+            GameBoard.registerSpawnRoomHandler(nextPlayerComponent.handleMoveToNewRoom);
+
+            currentPlayer.IsActive = false;
+            nextPlayer.IsActive = true;
         }
 
         /// <summary>
