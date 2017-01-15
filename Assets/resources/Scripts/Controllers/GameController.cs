@@ -30,7 +30,7 @@ namespace ProjectSpace.Controllers {
         /// Dictionary containing a look-up for all of the room prefab objects, used for instantiating rooms. Indexed by the room name.
         /// </summary>
         private Dictionary<string, GameObject> roomPrefabs;
-        private Dictionary<int, GameObject> playerGameObjects;
+        public Dictionary<int, GameObject> PlayerGameObjects;
         /// <summary>
         /// Direction in which the player is currently moving for a preview room.
         /// </summary>
@@ -50,7 +50,7 @@ namespace ProjectSpace.Controllers {
         /// </summary>
         void Start() {
             GameBoard = new GameBoard();
-            playerGameObjects = new Dictionary<int, GameObject>();
+            PlayerGameObjects = new Dictionary<int, GameObject>();
             GameBoard.registerSpawnPreviewRoomAction(spawnPreviewRoomAt);
             GameBoard.registerRotatePreviewRoomHandler(rotatePreviewRoom);
             GameBoard.registerSpawnRoomHandler(spawnRoom);
@@ -64,6 +64,13 @@ namespace ProjectSpace.Controllers {
                     roomPrefabs.Add(go.name, go);
                 }
             }
+
+            TurnUIController turnUI = gameObject.GetComponent<TurnUIController>();
+            GameBoard.registerTurnEndHandler(turnUI.showTurnUI);
+
+            CameraController cameraController = gameObject.GetComponent<CameraController>();
+            GameBoard.registerTurnEndHandler(cameraController.trackToNextPlayer);
+
             GameBoard.LoadRooms();
             GameBoard.registerInitializeGameBoardHandler(initializeGameBoard);
             GameBoard.initializeNewGameBoard();
@@ -112,7 +119,7 @@ namespace ProjectSpace.Controllers {
         public void spawnPlayer(int playerIndex, float x, float y, bool isActive) {
             // TODO: Maybe have anchor points for each player?  This will result in the players being on top of each other if I keep it this way.
             GameObject player = Instantiate(playerPrefab, new Vector3(x, y, 0f), Quaternion.identity);
-            playerGameObjects.Add(playerIndex, player);
+            PlayerGameObjects.Add(playerIndex, player);
 
             PlayerModel playerModel = new PlayerModel(playerIndex, isActive);
             GameBoard.addPlayer(playerModel);
@@ -127,8 +134,8 @@ namespace ProjectSpace.Controllers {
 
         public void handlePlayerTurnEnd(PlayerModel currentPlayer, PlayerModel nextPlayer) {
             GameObject currentPlayerGO = null, nextPlayerGO = null;
-            playerGameObjects.TryGetValue(currentPlayer.PlayerNumber, out currentPlayerGO);
-            playerGameObjects.TryGetValue(nextPlayer.PlayerNumber, out nextPlayerGO);
+            PlayerGameObjects.TryGetValue(currentPlayer.PlayerNumber, out currentPlayerGO);
+            PlayerGameObjects.TryGetValue(nextPlayer.PlayerNumber, out nextPlayerGO);
 
             Player currentPlayerComponent = currentPlayerGO.GetComponent<Player>();
             Player nextPlayerComponent = nextPlayerGO.GetComponent<Player>();

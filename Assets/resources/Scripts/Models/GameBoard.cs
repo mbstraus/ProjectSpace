@@ -87,6 +87,8 @@ namespace ProjectSpace.Models {
             playerSpawnHandler(3, 0, -2, false);
             spawnRoom("EastAirlock", 2, 0, true, false, true, true, false);
             playerSpawnHandler(4, 2, 0, false);
+
+            turnEndHandler(players[0], players[0]);
         }
 
         public void LoadRooms() {
